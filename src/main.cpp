@@ -14,9 +14,7 @@
   S3 sets the contrast back to the middle.
 */
 #include <Arduino.h>
-#include "ColorLCDShield.h"
 #include "SwampController.h"
-#include "Buttons.h"
 #include "Relays.h"
 
 #define LCD_CONTRAST         (40)
@@ -39,24 +37,24 @@
 #define RELAY_PUMP_PIN       (48)
 #define RELAY_OFF_TIME_MS    (100)
 
-LCDShield  lcd;
+// LCDShield  lcd;
 MotorSpeed AirMotorSpeed;
 Pump       AirPump;
 HoldTimer  AirHold;
-Button     ButtonMotorSpeed(BUTTON_MOTOR_SPEED_PIN);
-Button     ButtonPump(BUTTON_PUMP_PIN);
-Button     ButtonHold(BUTTON_HOLD_PIN);
+// Button     ButtonMotorSpeed(BUTTON_MOTOR_SPEED_PIN);
+// Button     ButtonPump(BUTTON_PUMP_PIN);
+// Button     ButtonHold(BUTTON_HOLD_PIN);
 Relay      RelayMotorLow(RELAY_MOTOR_LOW_PIN);
 Relay      RelayMotorHigh(RELAY_MOTOR_HIGH_PIN);
 Relay      RelayPump(RELAY_PUMP_PIN);
 
 void updateMotorSpeed(void)
 {
-    lcd.setStr(AirMotorSpeed.GetText(),
-               SCREEN_MOTOR_SPEED_X,
-               SCREEN_VAL_Y,
-               SCREEN_VAL_COLOR,
-               SCREEN_BGND_COLOR);
+    // lcd.setStr(AirMotorSpeed.GetText(),
+    //            SCREEN_MOTOR_SPEED_X,
+    //            SCREEN_VAL_Y,
+    //            SCREEN_VAL_COLOR,
+    //            SCREEN_BGND_COLOR);
     Serial.print("Motor: ");
     Serial.println(AirMotorSpeed.GetText());
 
@@ -120,17 +118,17 @@ void setup()
     RelayPump.Off();
 
     Serial.begin(9600);
-    lcd.init(PHILLIPS, 1);
+    // lcd.init(PHILLIPS, 1);
 
-    lcd.contrast(LCD_CONTRAST);
-    lcd.clear(SCREEN_BGND_COLOR);
+    // lcd.contrast(LCD_CONTRAST);
+    // lcd.clear(SCREEN_BGND_COLOR);
 
-    lcd.setStr(
-        "Motor:", SCREEN_MOTOR_SPEED_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
-    lcd.setStr(
-        "Pump:", SCREEN_PUMP_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
-    lcd.setStr(
-        "Hold: ", SCREEN_HOLD_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
+    // lcd.setStr(
+    //     "Motor:", SCREEN_MOTOR_SPEED_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
+    // lcd.setStr(
+    //     "Pump:", SCREEN_PUMP_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
+    // lcd.setStr(
+    //     "Hold: ", SCREEN_HOLD_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
 
     AirMotorSpeed.TurnOff();
     AirPump.TurnOff();
@@ -153,29 +151,29 @@ void loop()
 {
     bool isHoldChanged = false;
 
-    ButtonMotorSpeed.Read();
-    ButtonPump.Read();
-    ButtonHold.Read();
+    // ButtonMotorSpeed.Read();
+    // ButtonPump.Read();
+    // ButtonHold.Read();
     isHoldChanged = AirHold.Update();
 
-    if (ButtonMotorSpeed.IsClick())
-    {
-        AirMotorSpeed.Change();
-        updateMotorSpeed();
-    }
+    // if (ButtonMotorSpeed.IsClick())
+    // {
+    //     AirMotorSpeed.Change();
+    //     updateMotorSpeed();
+    // }
 
-    if (ButtonPump.IsClick())
-    {
-        AirPump.Change();
-        updatePump();
-    }
+    // if (ButtonPump.IsClick())
+    // {
+    //     AirPump.Change();
+    //     updatePump();
+    // }
 
-    if (ButtonHold.IsClick())
-    {
-        AirHold.AddTime();
-        isHoldChanged = true;
-    }
-    else if (ButtonHold.IsLongPress())
+    // if (ButtonHold.IsClick())
+    // {
+    //     AirHold.AddTime();
+    //     isHoldChanged = true;
+    // }
+    // else if (ButtonHold.IsLongPress())
     {
         AirHold.Stop();
         isHoldChanged = true;
