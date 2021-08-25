@@ -16,6 +16,11 @@
 #include <Arduino.h>
 #include "SwampController.h"
 #include "Relays.h"
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_GFX.h>    // Core graphics library
+#include <SPI.h>
+#include <Adafruit_ILI9341.h>
+#include "TouchScreen.h"
 
 #define LCD_CONTRAST         (40)
 #define SCREEN_Y_OFFSET      (10)
@@ -32,9 +37,9 @@
 #define BUTTON_PUMP_PIN        (4)
 #define BUTTON_HOLD_PIN        (3)
 
-#define RELAY_MOTOR_LOW_PIN  (52)
-#define RELAY_MOTOR_HIGH_PIN (50)
-#define RELAY_PUMP_PIN       (48)
+#define RELAY_MOTOR_LOW_PIN  (12)
+#define RELAY_MOTOR_HIGH_PIN (13)
+#define RELAY_PUMP_PIN       (A1)
 #define RELAY_OFF_TIME_MS    (100)
 
 // LCDShield  lcd;
@@ -80,11 +85,11 @@ void updateMotorSpeed(void)
 
 void updatePump(void)
 {
-    lcd.setStr(AirPump.GetText(),
-               SCREEN_PUMP_X,
-               SCREEN_VAL_Y,
-               SCREEN_VAL_COLOR,
-               SCREEN_BGND_COLOR);
+    // lcd.setStr(AirPump.GetText(),
+    //            SCREEN_PUMP_X,
+    //            SCREEN_VAL_Y,
+    //            SCREEN_VAL_COLOR,
+    //            SCREEN_BGND_COLOR);
     Serial.print("Pump: ");
     Serial.println(AirPump.GetText());
 
@@ -102,11 +107,11 @@ void updatePump(void)
 
 void updateHold(void)
 {
-    lcd.setStr(AirHold.GetText(),
-               SCREEN_HOLD_X,
-               SCREEN_VAL_Y,
-               SCREEN_VAL_COLOR,
-               SCREEN_BGND_COLOR);
+    // lcd.setStr(AirHold.GetText(),
+    //            SCREEN_HOLD_X,
+    //            SCREEN_VAL_Y,
+    //            SCREEN_VAL_COLOR,
+    //            SCREEN_BGND_COLOR);
     Serial.print("Hold: ");
     Serial.println(AirHold.GetText());
 }
@@ -174,10 +179,10 @@ void loop()
     //     isHoldChanged = true;
     // }
     // else if (ButtonHold.IsLongPress())
-    {
-        AirHold.Stop();
-        isHoldChanged = true;
-    }
+    // {
+    //     AirHold.Stop();
+    //     isHoldChanged = true;
+    // }
 
     if (isHoldChanged)
     {
