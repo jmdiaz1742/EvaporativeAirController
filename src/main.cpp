@@ -13,45 +13,101 @@
   Hit S1 to increase the contrast, S2 decreases the contrast, and
   S3 sets the contrast back to the middle.
 */
-#include <Arduino.h>
-#include "SwampController.h"
 #include "Relays.h"
-#include <Adafruit_I2CDevice.h>
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <SPI.h>
-#include <Adafruit_ILI9341.h>
+#include "SwampController.h"
 #include "TouchScreen.h"
+#include <Adafruit_GFX.h> // Core graphics library
+#include <Adafruit_I2CDevice.h>
+#include <Adafruit_ILI9341.h>
+#include <Arduino.h>
+#include <SPI.h>
 
-#define LCD_CONTRAST         (40)
-#define SCREEN_Y_OFFSET      (10)
-#define SCREEN_MOTOR_SPEED_X (5)
-#define SCREEN_PUMP_X        (35)
-#define SCREEN_HOLD_X        (65)
-#define SCREEN_VAL_Y         (75)
+#define SCREEN_X_OFFSET      (10)
+#define SCREEN_MOTOR_SPEED_Y (50)
+#define SCREEN_PUMP_Y        (150)
+#define SCREEN_HOLD_Y        (250)
+#define SCREEN_VAL_X         (20)
 
-#define SCREEN_BGND_COLOR BLACK
-#define SCREEN_TEXT_COLOR WHITE
-#define SCREEN_VAL_COLOR  YELLOW
+#define BUTTON_SIZE_X               (80)
+#define BUTTON_SIZE_Y               (40)
+#define BUTTON_FRAME_WIDTH          (3)
+#define SCREEN_MOTOR_SPEED_BUTTON_X (100)
+#define SCREEN_MOTOR_SPEED_BUTTON_Y (SCREEN_MOTOR_SPEED_Y - (BUTTON_SIZE_Y / 2))
+#define SCREEN_PUMP_BUTTON_X        (100)
+#define SCREEN_PUMP_BUTTON_Y        (SCREEN_PUMP_Y - (BUTTON_SIZE_Y / 2))
+#define SCREEN_HOLD_PLUS_BUTTON_X   (100)
+#define SCREEN_HOLD_PLUS_BUTTON_Y   (SCREEN_HOLD_Y - (BUTTON_SIZE_Y / 2))
+#define SCREEN_HOLD_MINUS_BUTTON_X  (100)
+#define SCREEN_HOLD_MINUS_BUTTON_Y  (SCREEN_HOLD_Y - (BUTTON_SIZE_Y / 2))
 
-#define BUTTON_MOTOR_SPEED_PIN (5)
-#define BUTTON_PUMP_PIN        (4)
-#define BUTTON_HOLD_PIN        (3)
+#define SCREEN_BGND_COLOR      ILI9341_BLACK
+#define SCREEN_TEXT_COLOR      ILI9341_WHITE
+#define SCREEN_VAL_COLOR       ILI9341_YELLOW
+#define SCREEN_BUTTON_FRAME    ILI9341_WHITE
+#define SCREEN_BUTTON_FILL_OFF SCREEN_BGND_COLOR
+#define SCREEN_BUTTON_FILL_ON  ILI9341_GREEN
 
 #define RELAY_MOTOR_LOW_PIN  (12)
 #define RELAY_MOTOR_HIGH_PIN (13)
-#define RELAY_PUMP_PIN       (A1)
-#define RELAY_OFF_TIME_MS    (100)
+// Size of the color selection boxes and the paintbrush size
+#define RELAY_PUMP_PIN    (A1)
+#define RELAY_OFF_TIME_MS (100)
+
+// These are the four touchscreen analog pins
+#define YP A2 // must be an analog pin, use "An" notation!
+#define XM A3 // must be an analog pin, use "An" notation!
+#define YM 9  // can be any digital pin
+#define XP 8  // can be any digital pin
+
+// This is calibration data for the raw touch data to the screen coordinates
+#define TS_MINX 150
+#define TS_MINY 120
+#define TS_MAXX 920
+#define TS_MAXY 940
+
+#define MINPRESSURE 10
+#define MAXPRESSURE 1000
+
+// The display uses hardware SPI, plus #9 & #10
+#define TFT_CS 10
+#define TFT_DC 9
+Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
+
+// For better pressure precision, we need to know the resistance
+// between X+ and X- Use any multimeter to read it
+// For the one we're using, its 300 ohms across the X plate
+TouchScreen touchScreen = TouchScreen(XP, YP, XM, YM, 300);
 
 // LCDShield  lcd;
 MotorSpeed AirMotorSpeed;
 Pump       AirPump;
 HoldTimer  AirHold;
-// Button     ButtonMotorSpeed(BUTTON_MOTOR_SPEED_PIN);
-// Button     ButtonPump(BUTTON_PUMP_PIN);
-// Button     ButtonHold(BUTTON_HOLD_PIN);
 Relay      RelayMotorLow(RELAY_MOTOR_LOW_PIN);
 Relay      RelayMotorHigh(RELAY_MOTOR_HIGH_PIN);
 Relay      RelayPump(RELAY_PUMP_PIN);
+
+void drawButton(int16_t x, int16_t y, bool state)
+{
+    uint16_t fillColor;
+
+    if (state)
+    {
+        fillColor = SCREEN_BUTTON_FILL_ON;
+    }
+    else
+    {
+        fillColor = SCREEN_BUTTON_FILL_OFF;
+    }
+
+    // Draw the white rectangle as outline
+    tft.fillRect(x, y, BUTTON_SIZE_X, BUTTON_SIZE_Y, SCREEN_BUTTON_FRAME);
+    // Draw the fill rectangle
+    tft.fillRect(x + BUTTON_FRAME_WIDTH,
+                 y + BUTTON_FRAME_WIDTH,
+                 BUTTON_SIZE_X - (BUTTON_FRAME_WIDTH * 2),
+                 BUTTON_SIZE_Y - (BUTTON_FRAME_WIDTH * 2),
+                 fillColor);
+}
 
 void updateMotorSpeed(void)
 {
@@ -123,17 +179,6 @@ void setup()
     RelayPump.Off();
 
     Serial.begin(9600);
-    // lcd.init(PHILLIPS, 1);
-
-    // lcd.contrast(LCD_CONTRAST);
-    // lcd.clear(SCREEN_BGND_COLOR);
-
-    // lcd.setStr(
-    //     "Motor:", SCREEN_MOTOR_SPEED_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
-    // lcd.setStr(
-    //     "Pump:", SCREEN_PUMP_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
-    // lcd.setStr(
-    //     "Hold: ", SCREEN_HOLD_X, SCREEN_Y_OFFSET, SCREEN_TEXT_COLOR, SCREEN_BGND_COLOR);
 
     AirMotorSpeed.TurnOff();
     AirPump.TurnOff();
@@ -141,6 +186,21 @@ void setup()
     updateMotorSpeed();
     updatePump();
     updateHold();
+
+    tft.begin();
+    tft.fillScreen(SCREEN_BGND_COLOR);
+
+    tft.setTextColor(SCREEN_TEXT_COLOR);
+    tft.setTextSize(2);
+    tft.setCursor(SCREEN_X_OFFSET, SCREEN_MOTOR_SPEED_Y);
+    tft.println("Motor:");
+    drawButton(SCREEN_MOTOR_SPEED_BUTTON_X, SCREEN_MOTOR_SPEED_BUTTON_Y, false);
+    tft.setCursor(SCREEN_X_OFFSET, SCREEN_PUMP_Y);
+    tft.println("Pump:");
+    drawButton(SCREEN_PUMP_BUTTON_X, SCREEN_PUMP_BUTTON_Y, false);
+    tft.setCursor(SCREEN_X_OFFSET, SCREEN_HOLD_Y);
+    tft.println("Hold:");
+    drawButton(SCREEN_HOLD_MINUS_BUTTON_X, SCREEN_HOLD_MINUS_BUTTON_Y, false);
 }
 
 void turnAllOff(void)
@@ -156,9 +216,8 @@ void loop()
 {
     bool isHoldChanged = false;
 
-    // ButtonMotorSpeed.Read();
-    // ButtonPump.Read();
-    // ButtonHold.Read();
+    // Read touchscreen
+    TSPoint point = touchScreen.getPoint();
     isHoldChanged = AirHold.Update();
 
     // if (ButtonMotorSpeed.IsClick())
