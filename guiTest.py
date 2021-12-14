@@ -1,5 +1,7 @@
 from guizero import App, Text, PushButton, Picture
 from datetime import datetime, timedelta
+import sys, getopt
+import argparse
 
 # Air controller variables
 motor_speed = 0
@@ -9,6 +11,7 @@ pump_state_text = ["Off", "On"]
 time_hold = False
 hold_until_time = datetime.now()
 time_holding_step = 15
+dry_run = False
 
 
 def motor_button_clicked():
@@ -206,7 +209,27 @@ cancel_hold_button.text_size = font_size
 time_subs_button.text_size = font_size
 time_add_button.text_size = font_size
 
+# argv = sys.argv[1:]
+# try:
+#     opts, args = getopt.getopt(argv, 'd')
+#     for opt, arg in opts:
+#         print("arg: " + str(opts[opt]))
+#         # if (opts[arg] == "-d"):
+#         #     dry_run = True
+#         #     print("Using dry run, we won't activate any relays")
+# except getopt.GetoptError:
+#     # Print something useful
+#     print ('Parameter error')
+#     sys.exit(2)
+
+ap = argparse.ArgumentParser()
+# Add the arguments to the parser
+ap.add_argument('dry', help="Dry run")
+args = vars(ap.parse_args())
+if (args['dry'] == 'dry'):
+    print("Dry run, relays won't actuate")
+
 # UI loop
 time_text.repeat(1000, check_remaining_time)
-app.set_full_screen()
+# app.set_full_screen()
 app.display()
