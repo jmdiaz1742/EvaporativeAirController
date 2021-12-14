@@ -1,6 +1,12 @@
 from guizero import App, Text, PushButton, Picture
-from datetime import datetime, timedelta
+from datetime import time, datetime, timedelta
 import argparse
+try:
+    import RPi.GPIO as GPIO
+    relays_enabled = True
+except ImportError:
+    print("Running in desktop probably")
+    relays_enabled = False
 
 
 def motor_button_clicked():
@@ -16,6 +22,7 @@ def motor_button_clicked():
     else:
         motor_text.text_color = 'black'
     motor_text.value = motor_speed_text[motor_speed]
+    set_motor_speed(motor_speed)
     print("speed: " + motor_speed_text[motor_speed])
 
 
@@ -32,6 +39,7 @@ def pump_button_clicked():
     else:
         pump_text.text_color = 'black'
     pump_text.value = pump_state_text[pump_state]
+    set_pump(pump_state)
     print("Pump: " + pump_state_text[pump_state])
 
 
@@ -102,6 +110,7 @@ def refresh_time():
         time_text.text_color = 'black'
         cancel_hold_button.disable()
         time_subs_button.disable()
+        turn_off_all()
 
 
 def check_remaining_time():
@@ -110,6 +119,7 @@ def check_remaining_time():
     global hold_until_time
     global time_text
     global time_subs_button
+    global time_holding_step
 
     # No need to check anything if we don't have a hold
     if (time_hold):
@@ -125,6 +135,53 @@ def check_remaining_time():
         print("Remaining time: " + str(remaining_time.total_seconds()))
 
 
+def init_pins():
+    global relays_enabled
+    global pin_motor_low
+    global pin_motor_high
+    global pin_pump
+
+    if (relays_enabled):
+        GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(pin_motor_low, GPIO.OUT)
+        GPIO.setup(pin_motor_high, GPIO.OUT)
+        GPIO.setup(pin_pump, GPIO.OUT)
+
+
+def set_motor_speed(speed):
+    global relays_enabled
+    global pin_motor_low
+    global pin_motor_high
+
+    if (relays_enabled):
+        # First shut down all motor relays, and wait a bit
+        GPIO.output(pin_motor_low, GPIO.LOW)
+        GPIO.output(pin_motor_low, GPIO.LOW)
+        time.sleep(250)
+
+        if (speed == 1):
+            GPIO.output(pin_motor_low, GPIO.HIGH)
+        elif (speed == 2):
+            GPIO.output(pin_motor_high, GPIO.HIGH)
+
+
+def set_pump(pump):
+    global relays_enabled
+    global pin_pump
+
+    if (relays_enabled):
+        if (pin_pump == 0):
+            GPIO.output(pin_pump, GPIO.LOW)
+        elif (pin_pump == 1):
+            GPIO.output(pin_pump, GPIO.HIGH)
+
+
+def turn_off_all():
+    set_motor_speed(0)
+    set_pump(0)
+    print("System Off")
+
+
 # Air controller variables
 motor_speed = 0
 motor_speed_text = ["Off", "Low", "High"]
@@ -133,7 +190,9 @@ pump_state_text = ["Off", "On"]
 time_hold = False
 hold_until_time = datetime.now()
 time_holding_step = 15
-dry_run = False
+pin_motor_low = 5
+pin_motor_high = 5
+pin_pump = 13
 
 # UI elements
 element_height = 3
@@ -212,10 +271,12 @@ parser.add_argument("--dry", action="store_true",
                     help="Dry run, relays don't turn on")
 args = parser.parse_args()
 if (args.dry):
-    dry_run = True
+    relays_enabled = False
     print("Dry run, relays won't turn on")
 
 # UI loop
+init_pins()
+turn_off_all()
 time_text.repeat(1000, check_remaining_time)
 # app.set_full_screen()
 app.display()
