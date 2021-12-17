@@ -1,4 +1,4 @@
-from guizero import App, Text, PushButton, Picture
+from guizero import App, Text, PushButton
 from datetime import datetime, timedelta
 import time
 import argparse
@@ -104,7 +104,6 @@ def refresh_time():
         time_text.text_color = text_color_inactive
         cancel_hold_button.disable()
         time_subs_button.disable()
-        turn_off_all()
 
 
 def check_remaining_time():
@@ -125,6 +124,7 @@ def check_remaining_time():
         if (remaining_time.total_seconds() < 0):
             # Time's up, we'll cancel the hold, and turn off everything
             print("Time's up")
+            turn_off_all()
             time_hold = False
             adjust_hold_time(0)
         else:
