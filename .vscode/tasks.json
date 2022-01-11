@@ -6,7 +6,7 @@
         {
             "label": "send to Raspi",
             "type": "shell",
-            "command": "scp * pi@raspberrypi.local:~/Documents/Git/EvaporativeAirController",
+            "command": "scp -r * pi@raspberrypi.local:~/Documents/Git/EvaporativeAirController",
             "problemMatcher": []
         }
     ]
