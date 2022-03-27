@@ -133,24 +133,23 @@ def check_remaining_time():
 
 def init_pins():
     global relays_enabled
-    global pin_motor_low
-    global pin_motor_high
-    global pin_pump
 
     if (relays_enabled):
+        global pin_motor_low
+        global pin_motor_high
+        global pin_pump
+
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(pin_motor_low, GPIO.OUT)
         GPIO.setup(pin_motor_high, GPIO.OUT)
         GPIO.setup(pin_pump, GPIO.OUT)
-        GPIO.output(pin_motor_low, pin_off)
-        GPIO.output(pin_motor_high, pin_off)
-        GPIO.output(pin_pump, pin_off)
+        GPIO.output(pin_motor_low, pin_level_off)
+        GPIO.output(pin_motor_high, pin_level_off)
+        GPIO.output(pin_pump, pin_level_off)
 
 
 def set_motor_speed(speed):
     global relays_enabled
-    global pin_motor_low
-    global pin_motor_high
     global motor_speed_text
     global motor_text
     global text_color_active
@@ -161,23 +160,26 @@ def set_motor_speed(speed):
     else:
         motor_text.text_color = text_color_inactive
     motor_text.value = motor_speed_text[speed]
-    print("Motor: " + motor_speed_text[speed])
 
     if (relays_enabled):
+        global pin_motor_low
+        global pin_motor_high
+
         # First shut down all motor relays, and wait a bit
-        GPIO.output(pin_motor_low, pin_off)
-        GPIO.output(pin_motor_high, pin_off)
+        GPIO.output(pin_motor_low, pin_level_off)
+        GPIO.output(pin_motor_high, pin_level_off)
         time.sleep(0.500)
 
         if (speed == 1):
-            GPIO.output(pin_motor_low, pin_on)
+            GPIO.output(pin_motor_low, pin_level_on)
         elif (speed == 2):
-            GPIO.output(pin_motor_high, pin_on)
+            GPIO.output(pin_motor_high, pin_level_on)
+
+    print("Motor: " + motor_speed_text[speed])
 
 
 def set_pump(state):
     global relays_enabled
-    global pin_pump
     global pump_state_text
     global pump_text
     global text_color_active
@@ -188,13 +190,16 @@ def set_pump(state):
     else:
         pump_text.text_color = text_color_inactive
     pump_text.value = pump_state_text[state]
-    print("Pump: " + pump_state_text[state])
 
     if (relays_enabled):
+        global pin_pump
+
         if (state == 0):
-            GPIO.output(pin_pump, pin_off)
+            GPIO.output(pin_pump, pin_level_off)
         elif (state == 1):
-            GPIO.output(pin_pump, pin_on)
+            GPIO.output(pin_pump, pin_level_on)
+
+    print("Pump: " + pump_state_text[state])
 
 
 def turn_off_all():
@@ -220,8 +225,8 @@ if (relays_enabled):
     pin_motor_low = 5
     pin_motor_high = 6
     pin_pump = 13
-    pin_off = GPIO.HIGH
-    pin_on = GPIO.LOW
+    pin_level_off = GPIO.HIGH
+    pin_level_on = GPIO.LOW
 
 # UI elements
 element_height = 3
