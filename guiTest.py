@@ -142,6 +142,9 @@ def init_pins():
         GPIO.setup(pin_motor_low, GPIO.OUT)
         GPIO.setup(pin_motor_high, GPIO.OUT)
         GPIO.setup(pin_pump, GPIO.OUT)
+        GPIO.output(pin_motor_low, pin_off)
+        GPIO.output(pin_motor_high, pin_off)
+        GPIO.output(pin_pump, pin_off)
 
 
 def set_motor_speed(speed):
@@ -155,14 +158,14 @@ def set_motor_speed(speed):
 
     if (relays_enabled):
         # First shut down all motor relays, and wait a bit
-        GPIO.output(pin_motor_low, GPIO.LOW)
-        GPIO.output(pin_motor_low, GPIO.LOW)
-        time.sleep(0.25)
+        GPIO.output(pin_motor_low, pin_off)
+        GPIO.output(pin_motor_high, pin_off)
+        time.sleep(0.500)
 
         if (speed == 1):
-            GPIO.output(pin_motor_low, GPIO.HIGH)
+            GPIO.output(pin_motor_low, pin_on)
         elif (speed == 2):
-            GPIO.output(pin_motor_high, GPIO.HIGH)
+            GPIO.output(pin_motor_high, pin_on)
 
     if speed > 0:
         motor_text.text_color = text_color_active
@@ -182,9 +185,9 @@ def set_pump(state):
 
     if (relays_enabled):
         if (state == 0):
-            GPIO.output(pin_pump, GPIO.LOW)
+            GPIO.output(pin_pump, pin_off)
         elif (state == 1):
-            GPIO.output(pin_pump, GPIO.HIGH)
+            GPIO.output(pin_pump, pin_on)
 
     if state > 0:
         pump_text.text_color = text_color_active
@@ -215,7 +218,9 @@ hold_until_time = datetime.now()
 time_holding_step = 30
 pin_motor_low = 5
 pin_motor_high = 6
-pin_pump = 26
+pin_pump = 13
+pin_off = GPIO.HIGH
+pin_on = GPIO.LOW
 
 # UI elements
 element_height = 3
