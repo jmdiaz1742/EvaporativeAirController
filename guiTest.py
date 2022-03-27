@@ -216,11 +216,12 @@ pump_state_text = ["Off", "On"]
 time_hold = False
 hold_until_time = datetime.now()
 time_holding_step = 30
-pin_motor_low = 5
-pin_motor_high = 6
-pin_pump = 13
-pin_off = GPIO.HIGH
-pin_on = GPIO.LOW
+if (relays_enabled):
+    pin_motor_low = 5
+    pin_motor_high = 6
+    pin_pump = 13
+    pin_off = GPIO.HIGH
+    pin_on = GPIO.LOW
 
 # UI elements
 element_height = 3
