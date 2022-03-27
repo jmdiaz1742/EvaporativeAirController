@@ -156,6 +156,13 @@ def set_motor_speed(speed):
     global text_color_active
     global text_color_inactive
 
+    if speed > 0:
+        motor_text.text_color = text_color_active
+    else:
+        motor_text.text_color = text_color_inactive
+    motor_text.value = motor_speed_text[speed]
+    print("Motor: " + motor_speed_text[speed])
+
     if (relays_enabled):
         # First shut down all motor relays, and wait a bit
         GPIO.output(pin_motor_low, pin_off)
@@ -167,13 +174,6 @@ def set_motor_speed(speed):
         elif (speed == 2):
             GPIO.output(pin_motor_high, pin_on)
 
-    if speed > 0:
-        motor_text.text_color = text_color_active
-    else:
-        motor_text.text_color = text_color_inactive
-    motor_text.value = motor_speed_text[speed]
-    print("Motor: " + motor_speed_text[speed])
-
 
 def set_pump(state):
     global relays_enabled
@@ -183,18 +183,18 @@ def set_pump(state):
     global text_color_active
     global text_color_inactive
 
-    if (relays_enabled):
-        if (state == 0):
-            GPIO.output(pin_pump, pin_off)
-        elif (state == 1):
-            GPIO.output(pin_pump, pin_on)
-
     if state > 0:
         pump_text.text_color = text_color_active
     else:
         pump_text.text_color = text_color_inactive
     pump_text.value = pump_state_text[state]
     print("Pump: " + pump_state_text[state])
+
+    if (relays_enabled):
+        if (state == 0):
+            GPIO.output(pin_pump, pin_off)
+        elif (state == 1):
+            GPIO.output(pin_pump, pin_on)
 
 
 def turn_off_all():
