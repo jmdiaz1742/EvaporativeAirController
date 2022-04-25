@@ -14,21 +14,26 @@ def motor_off_button_clicked():
     global motor_speed
     set_motor_speed(0)
 
+
 def motor_low_button_clicked():
     global motor_speed
     set_motor_speed(1)
+
 
 def motor_high_button_clicked():
     global motor_speed
     set_motor_speed(2)
 
+
 def pump_off_button_clicked():
     global pump_state
     set_pump(0)
 
+
 def pump_on_button_clicked():
     global pump_state
     set_pump(1)
+
 
 def time_subs_button_clicked():
     global time_hold
@@ -102,7 +107,7 @@ def refresh_time():
         time_text.value = "Hold until:\n" + hold_until_time.strftime("%H:%M")
         time_text.text_color = text_color_active
     else:
-        time_text.value = "Current time:\n" + datetime.now().strftime("%H:%M")
+        time_text.value = "Time:\n" + datetime.now().strftime("%H:%M")
         time_text.text_color = text_color_inactive
         cancel_hold_button.disable()
         time_subs_button.disable()
@@ -162,7 +167,7 @@ def set_motor_speed(speed):
     motor_high_button.text_color = text_color_inactive
     if speed == 1:
         motor_low_button.text_color = text_color_active
-    elif speed ==2:
+    elif speed == 2:
         motor_high_button.text_color = text_color_active
     else:
         motor_off_button.text_color = text_color_active
@@ -236,12 +241,12 @@ if (relays_enabled):
     pin_level_on = GPIO.LOW
 
 # UI elements
-element_height = 2
-button_width = 6
-time_button_width = 4
-text_width = 12
+element_height = 3
+button_width = 7
+time_button_width = 7
+text_width = 7
 exit_button_size = 1
-font_size = 16
+font_size = 12
 picture_size = 100
 bg_color = "#393F3F"
 text_color_default = "white"
@@ -253,55 +258,47 @@ app = App(title="Cool Air Controller",
           #   height=320,
           layout="grid",
           bg=bg_color)
-motor_text = Text(app,
-                  text="MOTOR",
-                  grid=[0, 0],
-                  size=font_size)
 motor_off_button = PushButton(app,
-                          command=motor_off_button_clicked,
-                          text="Off",
-                          grid=[0, 1],
-                          width=button_width,
-                          height=element_height)
+                              command=motor_off_button_clicked,
+                              text="Motor\nOff",
+                              grid=[0, 0],
+                              width=button_width,
+                              height=element_height)
 motor_low_button = PushButton(app,
-                          command=motor_low_button_clicked,
-                          text="Low",
-                          grid=[1, 1],
-                          width=button_width,
-                          height=element_height)
+                              command=motor_low_button_clicked,
+                              text="Motor\nLow",
+                              grid=[1, 0],
+                              width=button_width,
+                              height=element_height)
 motor_high_button = PushButton(app,
-                          command=motor_high_button_clicked,
-                          text="High",
-                          grid=[2, 1],
-                          width=button_width,
-                          height=element_height)
-pump_text = Text(app,
-                 text="PUMP",
-                 grid=[0, 2],
-                 size=font_size)
+                               command=motor_high_button_clicked,
+                               text="Motor\nHigh",
+                               grid=[2, 0],
+                               width=button_width,
+                               height=element_height)
 pump_off_button = PushButton(app,
-                         command=pump_off_button_clicked,
-                         text="Off",
-                         grid=[0, 3],
-                         width=button_width,
-                         height=element_height)
+                             command=pump_off_button_clicked,
+                             text="Pump\nOff",
+                             grid=[0, 1],
+                             width=button_width,
+                             height=element_height)
 pump_on_button = PushButton(app,
-                         command=pump_on_button_clicked,
-                         text="On",
-                         grid=[1, 3],
-                         width=button_width,
-                         height=element_height)
+                            command=pump_on_button_clicked,
+                            text="Pump\nOn",
+                            grid=[1, 1],
+                            width=button_width,
+                            height=element_height)
 cancel_hold_button = PushButton(app,
                                 command=cancel_hold_button_clicked,
                                 text="cancel",
                                 enabled=False,
-                                grid=[0, 4],
+                                grid=[0, 2],
                                 width=button_width,
                                 height=element_height)
 time_text = Text(app,
-                 text=str("Current time:\n" +
+                 text=str("Time:\n" +
                           datetime.now().strftime("%H:%M")),
-                 grid=[1, 4],
+                 grid=[1, 2],
                  width=text_width,
                  height=element_height,
                  size=font_size)
@@ -309,13 +306,13 @@ time_subs_button = PushButton(app,
                               command=time_subs_button_clicked,
                               text="-",
                               enabled=False,
-                              grid=[2, 4],
+                              grid=[2, 2],
                               width=time_button_width,
                               height=element_height)
 time_add_button = PushButton(app,
                              command=time_add_button_clicked,
                              text="+",
-                             grid=[3, 4],
+                             grid=[3, 2],
                              width=time_button_width,
                              height=element_height)
 exit_button = PushButton(app,
@@ -344,8 +341,6 @@ time_subs_button.text_color = text_color_default
 time_add_button.text_size = font_size
 time_add_button.text_color = text_color_default
 
-motor_text.text_color = text_color_inactive
-pump_text.text_color = text_color_inactive
 time_text.text_color = text_color_inactive
 
 parser = argparse.ArgumentParser()
