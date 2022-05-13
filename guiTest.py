@@ -241,12 +241,12 @@ if (relays_enabled):
     pin_level_on = GPIO.LOW
 
 # UI elements
-element_height = 3
-button_width = 7
-time_button_width = 7
-text_width = 7
+element_height = 4
+button_width = 8
+time_button_width = 8
+text_width = 8
 exit_button_size = 1
-font_size = 12
+font_size = 14
 picture_size = 100
 bg_color = "#393F3F"
 text_color_default = "white"
