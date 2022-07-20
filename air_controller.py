@@ -27,21 +27,24 @@ SCRIPT_FOLDER = Path(__file__).parent.resolve()
 CONFIG_FILE: str = str(SCRIPT_FOLDER)+"/airConf.json"
 MOTOR_SPEED_MAX: int = 2
 PUMP_STATE_MAX: int = 1
+TIME_HOLD_MAX: int = 1
 # Configuration
 DEF_CONF_JSON: json = {
     "motor": 0,
     "pump": 0,
-    "hold": False,
+    "time_hold": False,
     "hold_until_time": str(datetime.now())
 }
 INV_MOTOR: int = -1
 INV_PUMP: int = -1
+INV_TIME_HOLD: int = -1
 # GPIOs
-PIN_LEVEL_OFF = GPIO.HIGH
-PIN_LEVEL_ON = GPIO.LOW
-PIN_MOTOR_LOW = 5
-PIN_MOTOR_HIGH = 6
-PIN_PUMP = 13
+if (relays_enabled):
+    PIN_LEVEL_OFF = GPIO.HIGH
+    PIN_LEVEL_ON = GPIO.LOW
+    PIN_MOTOR_LOW = 5
+    PIN_MOTOR_HIGH = 6
+    PIN_PUMP = 13
 
 ###############################################################################
 # Variables
@@ -111,6 +114,19 @@ def set_pump(value: int) -> bool:
         return False
 
 
+def set_time_hold(value: str) -> bool:
+    """Validate the pump state"""
+    global conf_json
+    result: bool = True
+    if (value.casefold() == "false".casefold()):
+        conf_json["time_hold"] = "false"
+    elif (value.casefold() == "true".casefold()):
+        conf_json["time_hold"] = "true"
+    else:
+        result = False
+    return result
+
+
 def load_conf_file() -> bool:
     """Load the configuration file data"""
     global conf_json
@@ -155,6 +171,8 @@ parser.add_argument("-m", "--motor", help="Motor speed",
                     dest="motor_speed", default=INV_MOTOR)
 parser.add_argument("-p", "--pump", help="Pump state",
                     dest="pump_state", default=INV_PUMP)
+parser.add_argument("-l", "--hold", help="Time hold",
+                    dest="time_hold", default=INV_TIME_HOLD)
 
 
 ###############################################################################
@@ -194,6 +212,13 @@ if __name__ == "__main__":
             print("New pump state:", str(conf_json["pump"]))
         else:
             print("Wrong pump state", args.pump_state)
+            exit_script(False)
+
+    if(args.time_hold != INV_TIME_HOLD):
+        if(set_time_hold(args.time_hold)):
+            print("New hold:", str(conf_json["time_hold"]))
+        else:
+            print("Wrong hold", args.time_hold)
             exit_script(False)
 
     if(verbose_mode):
